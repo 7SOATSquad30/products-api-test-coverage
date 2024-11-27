@@ -44,7 +44,7 @@ jobs:
 
       - name: Extract and display coverage percentage
         run: |
-          # Find the Kover XML report
+          # Encontrar o relatório XML
           REPORT_PATH=$(find build/reports/kover -name "report.xml" | head -n 1)
           if [ -z "$REPORT_PATH" ]; then
             echo "Kover coverage report not found!"
@@ -53,11 +53,11 @@ jobs:
 
           echo "Found Kover XML report at: $REPORT_PATH"
 
-          # Display the content of the XML report
+          # Exibir conteúdo do relatório XML
           echo "Content of $REPORT_PATH:"
           cat "$REPORT_PATH"
 
-          # Extract coverage percentage using xmllint
+          # Extrair dados de cobertura
           COVERED=$(xmllint --xpath 'string(//counter[@type="LINE"]/@covered)' "$REPORT_PATH")
           MISSED=$(xmllint --xpath 'string(//counter[@type="LINE"]/@missed)' "$REPORT_PATH")
 
@@ -66,20 +66,25 @@ jobs:
             exit 1
           fi
 
-          # Calculate the percentage
           TOTAL=$((COVERED + MISSED))
+          if [ "$TOTAL" -eq 0 ]; then
+            echo "No lines of code were covered or missed. Coverage is effectively zero."
+            exit 1
+          fi
+
+          # Calcular percentual
           PERCENTAGE=$(echo "scale=2; ($COVERED / $TOTAL) * 100" | bc)
 
           echo "Coverage: $PERCENTAGE%"
-          
-          # Validate coverage percentage
+
+          # Validar cobertura mínima
           MINIMUM=50.0
           if (( $(echo "$PERCENTAGE < $MINIMUM" | bc -l) )); then
             echo "Coverage is below the minimum required: $MINIMUM%!"
             exit 1
           fi
-          echo "Coverage validation passed with $PERCENTAGE%."
 
+          echo "Coverage validation passed with $PERCENTAGE%."
 
   build:
     runs-on: ubuntu-latest
