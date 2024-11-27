@@ -94,19 +94,30 @@ jobs:
           java-version: 21
           distribution: 'zulu'
 
+      - name: Setup Docker Compose
+        run: |
+          curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          chmod +x /usr/local/bin/docker-compose
+
       - name: Cache Gradle packages
         uses: actions/cache@v3
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/build.gradle', '**/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('build.gradle', 'gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
+      - name: Raise infra
+        run: make infrastructure/up
 
+      - name: Grant execute permission for Gradlew
+        run: chmod +x gradlew
+
+      - name: Run Spotless Apply
+        run: ./gradlew spotlessApply
+  
       - name: Code linting
         run: ./gradlew spotlessCheck
 
