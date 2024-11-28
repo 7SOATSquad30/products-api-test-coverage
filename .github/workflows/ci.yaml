@@ -35,29 +35,29 @@ jobs:
 
       - name: Run Spotless Check
         run: ./gradlew spotlessCheck
-  
-      - name: Run tests and generate Kover report
+
+      - name: Run tests and generate JaCoCo report
         run: |
-          ./gradlew clean test koverXmlReport koverHtmlReport
-          echo "Generated Kover reports:"
-          ls -R build/reports/kover || echo "No Kover reports found."
+          ./gradlew clean test jacocoTestReport
+          echo "Generated JaCoCo reports:"
+          ls -R build/reports/jacoco || echo "No JaCoCo reports found."
 
       - name: Extract and display coverage percentage
         run: |
-          # Encontrar o relatório XML
-          REPORT_PATH=$(find build/reports/kover -name "report.xml" | head -n 1)
-          if [ -z "$REPORT_PATH" ]; then
-            echo "Kover coverage report not found!"
+          # Find the JaCoCo XML report
+          REPORT_PATH=build/reports/jacoco/test/jacocoTestReport.xml
+          if [ ! -f "$REPORT_PATH" ]; then
+            echo "JaCoCo coverage report not found!"
             exit 1
           fi
 
-          echo "Found Kover XML report at: $REPORT_PATH"
+          echo "Found JaCoCo XML report at: $REPORT_PATH"
 
-          # Exibir conteúdo do relatório XML
+          # Display the content of the XML report
           echo "Content of $REPORT_PATH:"
           cat "$REPORT_PATH"
 
-          # Extrair dados de cobertura
+          # Extract coverage percentage using xmllint
           COVERED=$(xmllint --xpath 'string(//counter[@type="LINE"]/@covered)' "$REPORT_PATH")
           MISSED=$(xmllint --xpath 'string(//counter[@type="LINE"]/@missed)' "$REPORT_PATH")
 
@@ -66,24 +66,18 @@ jobs:
             exit 1
           fi
 
+          # Calculate the percentage
           TOTAL=$((COVERED + MISSED))
-          if [ "$TOTAL" -eq 0 ]; then
-            echo "No lines of code were covered or missed. Coverage is effectively zero."
-            exit 1
-          fi
-
-          # Calcular percentual
           PERCENTAGE=$(echo "scale=2; ($COVERED / $TOTAL) * 100" | bc)
 
           echo "Coverage: $PERCENTAGE%"
-
-          # Validar cobertura mínima
+          
+          # Validate coverage percentage
           MINIMUM=50.0
           if (( $(echo "$PERCENTAGE < $MINIMUM" | bc -l) )); then
             echo "Coverage is below the minimum required: $MINIMUM%!"
             exit 1
           fi
-
           echo "Coverage validation passed with $PERCENTAGE%."
 
   build:
