@@ -89,7 +89,7 @@ kover {
 sourceSets {
     test {
         resources {
-            srcDirs = ["src/test/java"]
+            srcDirs = ["src/test/java/br/com/fiap/grupo30/products_api"]
         }
     }
 }
