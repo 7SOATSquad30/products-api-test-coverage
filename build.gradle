@@ -4,7 +4,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.6'
     id 'com.diffplug.spotless' version '6.25.0'
     id 'pmd'
-    id 'org.jetbrains.kotlinx.kover' version '0.7.3'
+    id 'jacoco'
 }
 
 group = 'br.com.fiap.grupo30.fastfood'
@@ -66,33 +66,13 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-kover {
-    // Gera os relatórios de cobertura em XML e HTML
-    xmlReport {
-        onCheck = true // Valida cobertura automaticamente no 'check'
-    }
-    verify {
-        rule {
-            name = "Minimum code coverage"
-            bound {
-                minValue = 50.0 // Define o mínimo de cobertura exigido
-            }
-        }
-    }
-    filters {
-        classes {
-            includes += ["br.com.fiap.grupo30.fastfood.*"] // Incluir os pacotes corretos
-        }
-    }
+jacoco {
+    toolVersion = "0.8.10" // Ou a versão mais recente
 }
 
-sourceSets {
-    test {
-        resources {
-            srcDirs = ["src/test/java/br/com/fiap/grupo30/products_api"]
-        }
+tasks.jacocoTestReport {
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
     }
 }
-
-
-tasks.check.dependsOn("koverXmlReport", "koverHtmlReport") // Garante que os relatórios sejam gerados no check
