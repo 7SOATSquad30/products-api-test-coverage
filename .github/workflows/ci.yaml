@@ -89,6 +89,12 @@ jobs:
           fi
           echo "Coverage validation passed with $PERCENTAGE%."
 
+      - name: Upload JaCoCo Coverage Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: jacoco-coverage-report
+          path: build/reports/jacoco/test/html
+
   build:
     runs-on: ubuntu-latest
     
