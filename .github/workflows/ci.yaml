@@ -41,6 +41,12 @@ jobs:
           ./gradlew clean test jacocoTestReport
           echo "Generated JaCoCo reports:"
           ls -R build/reports/jacoco || echo "No JaCoCo reports found."
+
+      - name: Upload JaCoCo Coverage Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: jacoco-coverage-report
+          path: build/reports/jacoco/test/html
       
       - name: Extract and display coverage percentage
         run: |
@@ -88,12 +94,6 @@ jobs:
             exit 1
           fi
           echo "Coverage validation passed with $PERCENTAGE%."
-
-      - name: Upload JaCoCo Coverage Report
-        uses: actions/upload-artifact@v3
-        with:
-          name: jacoco-coverage-report
-          path: build/reports/jacoco/test/html
 
   build:
     runs-on: ubuntu-latest
