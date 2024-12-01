@@ -42,49 +42,53 @@ jobs:
           echo "Generated JaCoCo reports:"
           ls -R build/reports/jacoco || echo "No JaCoCo reports found."
 
-      - name: Extract and display coverage percentage
-        run: |
-          # Find the JaCoCo XML report
-          REPORT_PATH=build/reports/jacoco/test/jacocoTestReport.xml
-          if [ ! -f "$REPORT_PATH" ]; then
-            echo "JaCoCo coverage report not found!"
-            exit 1
-          fi
+- name: Extract and display coverage percentage
+  run: |
+    # Caminho fixo do relatório XML
+    REPORT_PATH=build/reports/jacoco/test/jacocoTestReport.xml
 
-          echo "Found JaCoCo XML report at: $REPORT_PATH"
+    if [ ! -f "$REPORT_PATH" ]; then
+      echo "JaCoCo XML coverage report not found!"
+      exit 1
+    fi
 
-          # Display the content of the XML report
-          echo "Content of $REPORT_PATH:"
-          cat "$REPORT_PATH"
+    echo "Found JaCoCo XML report at: $REPORT_PATH"
 
-          # Extract coverage percentage using xmllint
-          COVERED=$(xmllint --xpath 'string(//counter[@type="LINE"]/@covered)' "$REPORT_PATH")
-          MISSED=$(xmllint --xpath 'string(//counter[@type="LINE"]/@missed)' "$REPORT_PATH")
+    # Extração dos dados de cobertura
+    COVERED=$(xmllint --xpath 'string(sum(//counter[@type="LINE"]/@covered))' "$REPORT_PATH")
+    MISSED=$(xmllint --xpath 'string(sum(//counter[@type="LINE"]/@missed))' "$REPORT_PATH")
 
-          if [ -z "$COVERED" ] || [ -z "$MISSED" ]; then
-            echo "No coverage data found in the report."
-            exit 1
-          fi
+    if [ -z "$COVERED" ] || [ -z "$MISSED" ]; then
+      echo "Error: Unable to extract coverage data from the XML report."
+      exit 1
+    fi
 
-          # Calculate the percentage
-          TOTAL=$((COVERED + MISSED))
-          PERCENTAGE=$(echo "scale=2; ($COVERED / $TOTAL) * 100" | bc)
+    # Converte valores para inteiros para evitar problemas de cálculo
+    COVERED=$(printf "%.0f" "$COVERED")
+    MISSED=$(printf "%.0f" "$MISSED")
+    TOTAL=$((COVERED + MISSED))
 
-          echo "Coverage: $PERCENTAGE%"
-          
-          # Validate coverage percentage
-          MINIMUM=50.0
-          if (( $(echo "$PERCENTAGE < $MINIMUM" | bc -l) )); then
-            echo "Coverage is below the minimum required: $MINIMUM%!"
-            exit 1
-          fi
-          echo "Coverage validation passed with $PERCENTAGE%."
+    if [ "$TOTAL" -eq 0 ]; then
+      echo "Error: Total lines is zero, coverage cannot be calculated."
+      exit 1
+    fi
 
-      - name: Upload JaCoCo HTML Report
-        uses: actions/upload-artifact@v3
-        with:
-          name: jacoco-html-report
-          path: build/reports/jacoco/test/html
+    # Cálculo do percentual de cobertura
+    PERCENTAGE=$(echo "scale=2; ($COVERED / $TOTAL) * 100" | bc)
+
+    echo "Lines Covered: $COVERED"
+    echo "Lines Missed: $MISSED"
+    echo "Total Lines: $TOTAL"
+    echo "Coverage Percentage: $PERCENTAGE%"
+
+    # Validação da cobertura mínima
+    MINIMUM=50.0
+    if (( $(echo "$PERCENTAGE < $MINIMUM" | bc -l) )); then
+      echo "Coverage is below the minimum required: $MINIMUM%!"
+      exit 1
+    fi
+    echo "Coverage validation passed with $PERCENTAGE%."
+
 
   build:
     runs-on: ubuntu-latest
