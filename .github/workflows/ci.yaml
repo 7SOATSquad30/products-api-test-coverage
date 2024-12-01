@@ -81,14 +81,13 @@ jobs:
           echo "Total Lines: $TOTAL"
           echo "Coverage Percentage: $PERCENTAGE%"
       
-          # Validação da cobertura mínima
-          MINIMUM=50.0
+          # Validação da cobertura mínima (80%)
+          MINIMUM=80.0
           if (( $(echo "$PERCENTAGE < $MINIMUM" | bc -l) )); then
             echo "Coverage is below the minimum required: $MINIMUM%!"
             exit 1
           fi
           echo "Coverage validation passed with $PERCENTAGE%."
-
 
   build:
     runs-on: ubuntu-latest
