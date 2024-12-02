@@ -136,9 +136,9 @@ jobs:
           echo "Coverage validation passed with $PERCENTAGE%."
 ```
 
-
-🚀 
+ 
 ### Como Utilizar
+
 Executar o Workflow de CI:
 
 Faça um push no branch principal ou abra um pull request. <br>
@@ -155,7 +155,8 @@ Extraia o artefato baixado.<br>
 Abra o arquivo index.html no navegador para verificar a cobertura de código.
 
 
-📊 #### Validação de Cobertura
+#### Validação de Cobertura
+
 O workflow valida que a cobertura de código seja, no mínimo, 80%.<br>
 Caso a cobertura seja inferior, o processo de CI falhará.
 
@@ -166,7 +167,7 @@ Para alterar o percentual mínimo exigido, edite o workflow e modifique a variá
 MINIMUM=80.0
 ```
 
-💡 #### Dicas
+#### Dicas
 Certifique-se de rodar os testes localmente antes de fazer push para evitar falhas no workflow.<br>
 Utilize ferramentas de análise estática, como PMD e Spotless, para manter o código limpo e consistente.<br>
 Caso precise de ajuda, consulte a documentação oficial do JaCoCo.
